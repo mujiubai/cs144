@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <deque>
 
 class Reader;
 class Writer;
@@ -13,10 +14,15 @@ class ByteStream
 protected:
   uint64_t capacity_;
   // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.
+  std::deque<char> buffer_;
+  bool close_;
+  bool err_;
+  uint64_t totalPushBytes_;
+  uint64_t totalPopBytes_;
 
 public:
   explicit ByteStream( uint64_t capacity );
-
+  
   // Helper functions (provided) to access the ByteStream's Reader and Writer interfaces
   Reader& reader();
   const Reader& reader() const;
