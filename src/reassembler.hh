@@ -3,9 +3,16 @@
 #include "byte_stream.hh"
 
 #include <string>
+#include <map>
 
 class Reassembler
 {
+private:
+  uint64_t unassem_index_; //未整体好的窗口位置
+  uint64_t unaccept_index_; //不能接收的窗口位置
+  std::string buffers_;
+  std::map<uint64_t,uint64_t> map_;
+  bool is_last_flag_;
 public:
   /*
    * Insert a new substring to be reassembled into a ByteStream.
@@ -31,4 +38,6 @@ public:
 
   // How many bytes are stored in the Reassembler itself?
   uint64_t bytes_pending() const;
+
+  Reassembler();
 };
