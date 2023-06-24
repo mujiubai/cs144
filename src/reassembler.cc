@@ -4,14 +4,25 @@
 using namespace std;
 
 Reassembler::Reassembler() : unassem_index_( 0 ), unaccept_index_( 0 ), buffers_(), map_(), is_last_flag_( false )
-{}
+{
+  // std::cout << "*********************************" << std::endl;
+}
+
+uint64_t Reassembler::get_unassem_index()
+{
+  return unassem_index_;
+}
 
 void Reassembler::insert( uint64_t first_index, string data, bool is_last_substring, Writer& output )
 {
+  // std::cout << "-------------------" << std::endl;
+  // std::cout << "first_index=" << first_index << " data=" << data << std::endl;
   is_last_flag_ = is_last_substring || is_last_flag_;
   if ( data.size() == 0 ) {
-    if ( map_.empty() && is_last_flag_ ) // 不存在未读取数据且关闭标志
+    if ( map_.empty() && is_last_flag_ ) { // 不存在未读取数据且关闭标志
       output.close();
+      ++unassem_index_;
+    }
     return;
   }
 
@@ -30,15 +41,25 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     = min( data.size() - ( insert_start_index - first_index ), unaccept_index_ - insert_start_index );
   std::string insert_str = data.substr( insert_start_index - first_index, insert_size );
   buffers_.replace( insert_start_index - unassem_index_, insert_size, insert_str );
-
+  // std::cout << "buffers_=" << buffers_ << std::endl;
+  // std::cout << "unassem_index_=" << unassem_index_ << std::endl;
   uint64_t insert_end_index = insert_start_index + insert_size - 1;
 
   // 向前和向后遍历，从而将已存在的的数据流合并
-  map_[insert_start_index] = insert_end_index;
+  // map_[insert_start_index] = insert_end_index;
+
   auto cur_iter = map_.find( insert_start_index );
+
+  if ( cur_iter == map_.end() ) {
+    map_[insert_start_index] = insert_end_index;
+    cur_iter = map_.find( insert_start_index );
+  } else {
+    map_[insert_start_index] = max( insert_end_index, cur_iter->second );
+  }
   auto next_iter = cur_iter;
   ++next_iter;
   // 向后合并
+
   while ( next_iter != map_.end() ) {
     if ( cur_iter->second >= next_iter->first - 1 ) {
       cur_iter->second = max( next_iter->second, cur_iter->second );
@@ -62,12 +83,12 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
       break;
     }
   }
-
-  //如果合并后cur_iter的first处于待规整处，则说明此段可以被push进writer中。
+  // 如果合并后cur_iter的first处于待规整处，则说明此段可以被push进writer中。
   if ( cur_iter->first == unassem_index_ ) {
     // 取插入数据和可插入容量最小值
     unassem_index_ = min( cur_iter->second + 1, unassem_index_ + avail_push_size );
     std::string push_str = buffers_.substr( 0, unassem_index_ - cur_iter->first );
+    // std::cout << "push_str=" << push_str << std::endl;
     output.push( push_str );
     buffers_.erase( 0, unassem_index_ - cur_iter->first );
     // 如果cur_iter只被插入了部分，那么需要在map中记录剩余部分
@@ -77,9 +98,11 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     map_.erase( cur_iter );
   }
 
-  //只有map_不存在待规整数据且关闭标志为true时才关闭
-  if ( map_.empty() && is_last_flag_ )
+  // 只有map_不存在待规整数据且关闭标志为true时才关闭
+  if ( map_.empty() && is_last_flag_ ) {
     output.close();
+    ++unassem_index_;
+  }
 }
 
 uint64_t Reassembler::bytes_pending() const
@@ -88,6 +111,7 @@ uint64_t Reassembler::bytes_pending() const
   uint64_t count = 0;
   auto cur_iter = map_.begin();
   while ( cur_iter != map_.end() ) {
+    // std::cout << "cur_iter:" << cur_iter->first << " " << cur_iter->second << std::endl;
     count += cur_iter->second - cur_iter->first + 1;
     ++cur_iter;
   }
