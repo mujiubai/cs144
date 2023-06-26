@@ -126,6 +126,7 @@ optional<InternetDatagram> NetworkInterface::recv_frame( const EthernetFrame& fr
   return nullopt;
 }
 
+// 主要是对arp记录过期的处理，及重复ARP请求记录的处理
 // ms_since_last_tick: the number of milliseconds since the last call to this method
 void NetworkInterface::tick( const size_t ms_since_last_tick )
 {
