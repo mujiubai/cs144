@@ -32,14 +32,29 @@
 // the network interface passes it up the stack. If it's an ARP
 // request or reply, the network interface processes the frame
 // and learns or replies as necessary.
+
+namespace std {
+template<>
+struct hash<Address>
+{
+  size_t operator()( const Address& addr ) const { return hash<string> {}( addr.ip() ); }
+};
+}
+
 class NetworkInterface
 {
 private:
   // Ethernet (known as hardware, network-access, or link-layer) address of the interface
-  EthernetAddress ethernet_address_;
+  EthernetAddress ethernet_address_; // 主机以太网地址
 
   // IP (known as Internet-layer or network-layer) address of the interface
-  Address ip_address_;
+  Address ip_address_; // 主机IP地址
+
+  std::unordered_map<Address, std::pair<EthernetAddress, size_t>>
+    ip2eth_map_; // IP:(eth,time_to_expired), 记录IP到以太网的映射即当前还有多久过期
+  std::unordered_map<Address, size_t> arp_req_sending_; // 记录当前正在请求的arp及请求过去时间
+  std::queue<EthernetFrame> eth_frame_out_;             // 需要从以太网接口输出的帧
+  std::queue<std::pair<InternetDatagram, Address>> datagram_out_; // 待处理的数据报，例如因等待arp请求而等待的数据报
 
 public:
   // Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer)
