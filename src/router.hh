@@ -4,6 +4,7 @@
 
 #include <optional>
 #include <queue>
+#include <unordered_map>
 
 // A wrapper for NetworkInterface that makes the host-side
 // interface asynchronous: instead of returning received datagrams
@@ -48,12 +49,46 @@ public:
   }
 };
 
+// 自定义数据
+struct SubNetAddr
+{
+  uint32_t route_prefix;
+  uint8_t prefix_length;
+  bool operator==( const SubNetAddr& other ) const
+  {
+    return this->route_prefix == other.route_prefix && this->prefix_length == other.prefix_length;
+  }
+};
+struct SubNetInfo
+{
+  std::optional<Address> next_hop;
+  size_t interface_num;
+  SubNetInfo( std::optional<Address> next_hop1, size_t interface_num1 )
+    : next_hop( next_hop1 ), interface_num( interface_num1 )
+  {}
+};
+
+namespace std {
+// 定义对应哈希函数
+template<>
+struct hash<SubNetAddr>
+{
+  size_t operator()( const SubNetAddr& addr ) const
+  {
+    return hash<string> {}( to_string( addr.route_prefix ) + to_string( addr.prefix_length ) );
+  }
+};
+
+}
+
 // A router that has multiple network interfaces and
 // performs longest-prefix-match routing between them.
 class Router
 {
   // The router's collection of network interfaces
   std::vector<AsyncNetworkInterface> interfaces_ {};
+
+  std::unordered_map<SubNetAddr, SubNetInfo> route_map_;
 
 public:
   // Add an interface to the router
@@ -81,4 +116,8 @@ public:
   // route with the longest prefix_length that matches the datagram's
   // destination address.
   void route();
+
+  std::optional<SubNetInfo> find_best_match( uint32_t dst_addr );
+
+  Router();
 };
