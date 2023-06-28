@@ -23,7 +23,7 @@ class TCPSender
   bool is_SYN_;                // 是否成功发送SYN初始报文
   bool is_SYN_sending_; // SYN是否正在发送中，此时会占据一个窗口大小
   bool is_FIN_;         // 是否成功发送FIN报文
-  uint16_t retrans_times_; 
+  uint16_t retrans_times_; // 当前重传次数，主要用于指数避退和当前连接是否在重传过多后进行关闭
 
 public:
   /* Construct TCP sender with given default Retransmission Timeout and possible ISN */

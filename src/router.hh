@@ -86,9 +86,9 @@ struct hash<SubNetAddr>
 class Router
 {
   // The router's collection of network interfaces
-  std::vector<AsyncNetworkInterface> interfaces_ {};
+  std::vector<AsyncNetworkInterface> interfaces_ {}; // 以太网接口
 
-  std::unordered_map<SubNetAddr, SubNetInfo> route_map_;
+  std::unordered_map<SubNetAddr, SubNetInfo> route_map_; // 路由表
 
 public:
   // Add an interface to the router

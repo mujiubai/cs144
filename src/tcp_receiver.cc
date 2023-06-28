@@ -6,9 +6,6 @@ TCPReceiver::TCPReceiver() : zero_point_( 0 ), check_point_( UINT64_MAX ) {}
 
 void TCPReceiver::receive( TCPSenderMessage message, Reassembler& reassembler, Writer& inbound_stream )
 {
-  // std::cout << "message: " << message.seqno.get_raw_value() << " " << message.SYN << " " <<
-  // message.payload.size()
-  //           << " " << message.FIN << std::endl;
   if ( message.SYN ) {
     // 从未接受过数据则应该设置zero_point和check_point_
     if ( check_point_ == UINT64_MAX ) {

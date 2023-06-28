@@ -1,10 +1,10 @@
 #pragma once
 
+#include <deque>
 #include <queue>
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <deque>
 
 class Reader;
 class Writer;
@@ -12,17 +12,17 @@ class Writer;
 class ByteStream
 {
 protected:
-  uint64_t capacity_;
+  uint64_t capacity_; // 缓冲区容量限制
   // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.
-  std::deque<char> buffer_;
-  bool close_;
-  bool err_;
-  uint64_t totalPushBytes_;
-  uint64_t totalPopBytes_;
+  std::deque<char> buffer_; // 缓冲区
+  bool close_;              // 关闭标志
+  bool err_;                // 错误标志
+  uint64_t totalPushBytes_; // 总共放入字节数
+  uint64_t totalPopBytes_;  // 总共弹出字节数
 
 public:
   explicit ByteStream( uint64_t capacity );
-  
+
   // Helper functions (provided) to access the ByteStream's Reader and Writer interfaces
   Reader& reader();
   const Reader& reader() const;

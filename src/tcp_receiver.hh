@@ -8,8 +8,8 @@
 class TCPReceiver
 {
 private:
-  Wrap32 zero_point_;
-  uint64_t check_point_;
+  Wrap32 zero_point_;    // 初始sequence number
+  uint64_t check_point_; // 下一个待发送的stream index，初始为UINT64_MAX代表SYN未收到过
 public:
   /*
    * The TCPReceiver receives TCPSenderMessages, inserting their payload into the Reassembler

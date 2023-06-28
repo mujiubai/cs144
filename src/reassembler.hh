@@ -2,17 +2,17 @@
 
 #include "byte_stream.hh"
 
-#include <string>
 #include <map>
+#include <string>
 
 class Reassembler
 {
 private:
-  uint64_t unassem_index_; //未整体好的窗口位置
-  uint64_t unaccept_index_; //不能接收的窗口位置
-  std::string buffers_;
-  std::map<uint64_t,uint64_t> map_;
-  bool is_last_flag_;
+  uint64_t unassem_index_;           // 未整理好的窗口位置
+  uint64_t unaccept_index_;          // 不能接收的窗口位置
+  std::string buffers_;              //
+  std::map<uint64_t, uint64_t> map_; // 存储的是尚未被整理的字符串的开始序列号和结束序列号
+  bool is_last_flag_;                // 是否为最后一个字符串
 public:
   /*
    * Insert a new substring to be reassembled into a ByteStream.
