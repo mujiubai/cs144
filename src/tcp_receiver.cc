@@ -4,6 +4,7 @@ using namespace std;
 
 TCPReceiver::TCPReceiver() : zero_point_( 0 ), check_point_( UINT64_MAX ) {}
 
+//处理接受到的消息，包括更新序列号等，注意该函数并不处理ack消息（由TCPSender的receive函数处理）
 void TCPReceiver::receive( TCPSenderMessage message, Reassembler& reassembler, Writer& inbound_stream )
 {
   if ( message.SYN ) {
@@ -27,6 +28,7 @@ void TCPReceiver::receive( TCPSenderMessage message, Reassembler& reassembler, W
     check_point_ = reassembler.get_unassem_index();
 }
 
+//发送ack消息
 TCPReceiverMessage TCPReceiver::send( const Writer& inbound_stream ) const
 {
   // std::cout << "check_point_=" << check_point_ << " win=" << inbound_stream.available_capacity() << std::endl;

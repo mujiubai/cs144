@@ -5,6 +5,10 @@
 #include "tcp_sender_message.hh"
 #include "wrapping_integers.hh"
 
+/**
+ * @brief 功能：1.接受消息数据   2.发送ack消息
+ * 
+ */
 class TCPReceiver
 {
 private:

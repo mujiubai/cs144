@@ -6,6 +6,10 @@
 #include <deque>
 #include <queue>
 
+/**
+ * @brief 功能：1.发送消息数据   2.处理ack消息
+ * 
+ */
 class TCPSender
 {
   Wrap32 isn_;              // 初始序列号

@@ -35,6 +35,7 @@ uint64_t TCPSender::consecutive_retransmissions() const
   return { retrans_times_ };
 }
 
+//从缓冲区中取出待发送报文，为实现超时重传，还需将该消息保存到一个队列中
 optional<TCPSenderMessage> TCPSender::maybe_send()
 {
   // std::cout << "maybe_send runing---" << std::endl;
@@ -57,10 +58,16 @@ optional<TCPSenderMessage> TCPSender::maybe_send()
   return msg;
 }
 
+/**
+ * @brief 不断生成消息报文并插入到待发送缓冲区中，注意该函数并不生成ack消息，
+ * 且不生成三次握手的SYN+ack消息（猜测要么底层会将SYN消息和ack消息合并，要么就是四次握手）
+ * 
+ * @param outbound_stream 
+ */
 void TCPSender::push( Reader& outbound_stream )
 {
   bool is_finish = outbound_stream.is_finished();
-  // 从没发送给SYN报文
+  // 从没发送过SYN报文
   if ( !is_SYN_ ) {
     messages_out_.push_back( { Wrap32::wrap( 0ul, isn_ ), true, {}, is_finish } );
     is_SYN_ = true;
@@ -115,6 +122,7 @@ TCPSenderMessage TCPSender::send_empty_message() const
   return { Wrap32::wrap( next_send_idx_ + 1 + is_FIN_, isn_ ), false, {}, false };
 }
 
+//用于处理ack消息，而TCPReceiver的receive函数用于接受数据并进行序列号处理
 void TCPSender::receive( const TCPReceiverMessage& msg )
 {
   recv_win_size_ = msg.window_size;
